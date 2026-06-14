@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermia — Live Captions</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Epilogue:wght@400;600;700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0f0e;color:#e8ede8;font-family:'Epilogue',sans-serif;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:rgba(11,15,14,0.97);border-bottom:1px solid rgba(255,255,255,0.07);position:fixed;top:0;left:0;right:0;z-index:100}
+.logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;display:flex;align-items:center;gap:10px}
+.lm{width:28px;height:28px;background:#00c9a0;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#000;font-weight:800;font-size:14px}
+.status{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(232,237,232,0.4)}
+.sdot{width:8px;height:8px;border-radius:50%;background:#333;transition:background .3s}
+.sdot.live{background:#00c9a0;animation:glow 1.5s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(0,201,160,0.4)}50%{box-shadow:0 0 0 6px rgba(0,201,160,0)}}
+
+.wrap{padding:74px 24px 24px;max-width:1000px;margin:0 auto}
+
+/* Controls */
+.ctrl{background:#111916;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px 24px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.btn{padding:11px 24px;border-radius:7px;border:none;cursor:pointer;font-family:'Epilogue',sans-serif;font-weight:700;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:8px}
+.btn-go{background:#00c9a0;color:#000}
+.btn-go:hover{background:#00e5b7;transform:translateY(-1px)}
+.btn-go:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.btn-stop{background:rgba(255,82,82,0.1);color:#ff5252;border:1px solid rgba(255,82,82,0.2)}
+.btn-stop:hover{background:rgba(255,82,82,0.2)}
+.btn-stop:disabled{opacity:0.3;cursor:not-allowed}
+.mic-indicator{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(232,237,232,0.4)}
+.mic-bars{display:flex;gap:2px;align-items:flex-end;height:18px}
+.mic-bars span{width:3px;border-radius:2px;background:#00c9a0;animation:mb 0.8s ease-in-out infinite;opacity:0}
+.mic-bars.active span{opacity:1}
+.mic-bars span:nth-child(2){animation-delay:.1s}
+.mic-bars span:nth-child(3){animation-delay:.2s}
+.mic-bars span:nth-child(4){animation-delay:.15s}
+.mic-bars span:nth-child(5){animation-delay:.05s}
+@keyframes mb{0%,100%{height:3px}50%{height:16px}}
+
+/* Language pills */
+.langs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.lpill{padding:6px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(232,237,232,0.45);font-size:12px;font-family:'Epilogue',sans-serif;font-weight:600;cursor:pointer;transition:all .2s}
+.lpill:hover{border-color:rgba(0,201,160,0.3);color:rgba(232,237,232,0.7)}
+.lpill.on{background:rgba(0,201,160,0.12);border-color:rgba(0,201,160,0.35);color:#00c9a0}
+
+/* Caption display */
+.cap-box{background:#111916;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:28px 32px;margin-bottom:16px;min-height:160px;position:relative;overflow:hidden}
+.cap-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00c9a0,transparent);opacity:0;transition:opacity .3s}
+.cap-box.speaking::before{opacity:1;animation:scan 2s linear infinite}
+@keyframes scan{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.cap-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.cap-label{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(232,237,232,0.25);font-weight:600}
+.latency{font-family:'DM Mono',monospace;font-size:11px;color:#00c9a0;background:rgba(0,201,160,0.08);border:1px solid rgba(0,201,160,0.15);padding:3px 10px;border-radius:3px;display:none}
+.cap-interim{font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:rgba(232,237,232,0.35);margin-bottom:8px;min-height:30px;transition:all .15s}
+.cap-final{font-family:'Cormorant Garamond',serif;font-size:34px;line-height:1.3;color:#fff;min-height:50px}
+.cursor{display:inline-block;width:2px;height:28px;background:#00c9a0;margin-left:4px;vertical-align:middle;animation:cur .85s step-end infinite}
+@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Translation grid */
+.trans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:16px}
+.tcard{background:#111916;border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:16px 18px;transition:border-color .3s}
+.tcard.updated{border-color:rgba(0,201,160,0.4);animation:flash .5s ease}
+@keyframes flash{0%{background:rgba(0,201,160,0.08)}100%{background:transparent}}
+.tcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tcard-lang{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#00c9a0;display:flex;align-items:center;gap:6px}
+.tcard-code{background:rgba(0,201,160,0.12);padding:2px 7px;border-radius:3px;font-family:'DM Mono',monospace;font-size:10px}
+.tcard-ping{font-size:10px;color:rgba(232,237,232,0.25);font-family:'DM Mono',monospace}
+.tcard-text{font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;color:rgba(232,237,232,0.65);line-height:1.5;min-height:26px;transition:all .2s}
+.tcard-text.loading{color:rgba(232,237,232,0.2)}
+
+/* Log */
+.log{background:#080c0b;border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:12px 16px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(232,237,232,0.25);max-height:100px;overflow-y:auto}
+.log-line{margin-bottom:3px}
+.log-line.ok{color:#00c9a0}
+.log-line.err{color:#ff5252}
+.log-line.info{color:rgba(232,237,232,0.4)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><div class="lm">H</div>Hermia</div>
+  <div class="status">
+    <div class="sdot" id="sdot"></div>
+    <span id="stext">Disconnected</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="ctrl">
+    <button class="btn btn-go" id="startBtn" onclick="start()">🎤 Start Listening</button>
+    <button class="btn btn-stop" id="stopBtn" onclick="stop()" disabled>⏹ Stop</button>
+    <div class="mic-indicator">
+      <div class="mic-bars" id="micBars">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <span id="micText">Ready</span>
+    </div>
+    <div style="margin-left:auto;font-size:11px;color:rgba(232,237,232,0.25);max-width:200px;line-height:1.4">
+      🎤 Microphone access required. Audio is never stored. <a href="privacy.html" style="color:#00c9a0;text-decoration:none">Privacy Policy</a>
+    </div>
+  </div>
+
+  <div class="langs" id="langPills"></div>
+
+  <div class="cap-box" id="capBox">
+    <div class="cap-header">
+      <div class="cap-label">Live Captions — English</div>
+      <div class="latency" id="latency"></div>
+    </div>
+    <div class="cap-interim" id="capInterim"></div>
+    <div class="cap-final" id="capFinal">Click Start Listening and speak…<span class="cursor"></span></div>
+  </div>
+
+  <div class="trans-grid" id="transGrid"></div>
+  <div class="log" id="log"></div>
+
+</div>
+
+<script>
+const WS_URL = 'wss://hermia-server.onrender.com';
+
+const LANGS = [
+  {code:'fr',name:'French',cc:'FR'},
+  {code:'es',name:'Spanish',cc:'ES'},
+  {code:'ar',name:'Arabic',cc:'AR'},
+  {code:'sw',name:'Swahili',cc:'SW'},
+  {code:'yo',name:'Yoruba',cc:'YO'},
+  {code:'hi',name:'Hindi',cc:'HI'},
+  {code:'de',name:'German',cc:'DE'},
+  {code:'pt',name:'Portuguese',cc:'PT'},
+  {code:'zh',name:'Mandarin',cc:'ZH'},
+  {code:'ig',name:'Igbo',cc:'IG'},
+  {code:'ha',name:'Hausa',cc:'HA'},
+  {code:'ru',name:'Russian',cc:'RU'},
+];
+
+let ws = null;
+let recognition = null;
+let active = new Set(['fr','sw']);
+let lastFinal = '';
+let translationQueue = {};
+let debounceTimer = null;
+
+// ── Build UI ──
+function buildPills() {
+  document.getElementById('langPills').innerHTML = LANGS.map(l =>
+    `<button class="lpill ${active.has(l.code)?'on':''}" id="lp-${l.code}" onclick="toggleLang('${l.code}')">${l.name}</button>`
+  ).join('');
+}
+
+function buildCards() {
+  document.getElementById('transGrid').innerHTML = [...active].map(code => {
+    const l = LANGS.find(x => x.code === code);
+    return `<div class="tcard" id="tc-${code}">
+      <div class="tcard-top">
+        <div class="tcard-lang"><span class="tcard-code">${l.cc}</span>${l.name}</div>
+        <div class="tcard-ping" id="tp-${code}">—</div>
+      </div>
+      <div class="tcard-text" id="tt-${code}">Waiting…</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleLang(code) {
+  active.has(code) ? active.delete(code) : active.add(code);
+  document.getElementById('lp-'+code)?.classList.toggle('on', active.has(code));
+  buildCards();
+}
+
+// ── WebSocket ──
+function connectWS() {
+  ws = new WebSocket(WS_URL);
+  ws.onopen = () => { setStatus('Connected', true); log('Hermia server connected', 'ok'); };
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'translation') handleTranslation(msg);
+  };
+  ws.onclose = () => setStatus('Disconnected', false);
+  ws.onerror = () => log('Cannot reach server — is node server.js running?', 'err');
+}
+
+// ── Speech Recognition ──
+function start() {
+  connectWS();
+  buildCards();
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { log('Use Google Chrome for speech recognition', 'err'); return; }
+
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    document.getElementById('micBars').classList.add('active');
+    document.getElementById('micText').textContent = 'Listening…';
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    document.getElementById('capBox').classList.add('speaking');
+  };
+
+  recognition.onresult = (event) => {
+    let interim = '';
+    let final = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) final += t;
+      else interim += t;
+    }
+
+    // Show interim results instantly
+    if (interim) {
+      document.getElementById('capInterim').textContent = interim;
+    }
+
+    // On final result — show caption and translate
+    if (final.trim()) {
+      const text = final.trim();
+      lastFinal = text;
+      document.getElementById('capFinal').innerHTML = text + '<span class="cursor"></span>';
+      document.getElementById('capInterim').textContent = '';
+      log(`"${text}"`, 'info');
+      translateNow(text);
+    }
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error !== 'no-speech') log('Mic error: ' + e.error, 'err');
+  };
+
+  recognition.onend = () => {
+    // Auto-restart to keep it continuous
+    if (document.getElementById('stopBtn').disabled === false) {
+      recognition.start();
+    }
+  };
+
+  recognition.start();
+}
+
+function stop() {
+  if (recognition) { recognition.onend = null; recognition.stop(); }
+  if (ws) ws.close();
+  document.getElementById('micBars').classList.remove('active');
+  document.getElementById('micText').textContent = 'Ready';
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+  document.getElementById('capBox').classList.remove('speaking');
+  setStatus('Disconnected', false);
+}
+
+// ── Translation ──
+function translateNow(text) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (active.size === 0) return;
+
+  // Show loading state
+  [...active].forEach(code => {
+    const el = document.getElementById('tt-'+code);
+    if (el) { el.textContent = 'Translating…'; el.classList.add('loading'); }
+    const ping = document.getElementById('tp-'+code);
+    if (ping) ping.textContent = '…';
+  });
+
+  const t0 = Date.now();
+  ws.send(JSON.stringify({
+    type: 'translate',
+    text: text,
+    targetLangs: [...active]
+  }));
+
+  // Store request time per language
+  [...active].forEach(code => { translationQueue[code] = t0; });
+}
+
+function handleTranslation(msg) {
+  const { language, translated } = msg;
+  const el = document.getElementById('tt-'+language);
+  const ping = document.getElementById('tp-'+language);
+  const card = document.getElementById('tc-'+language);
+  const t0 = translationQueue[language];
+  const ms = t0 ? Date.now() - t0 : 0;
+
+  if (el) {
+    el.textContent = translated;
+    el.classList.remove('loading');
+  }
+  if (ping) ping.textContent = ms + 'ms';
+  if (card) {
+    card.classList.add('updated');
+    setTimeout(() => card.classList.remove('updated'), 600);
+  }
+
+  log(`${language.toUpperCase()} (${ms}ms): "${translated}"`, 'ok');
+}
+
+// ── Helpers ──
+function setStatus(text, live) {
+  document.getElementById('stext').textContent = text;
+  document.getElementById('sdot').className = 'sdot' + (live ? ' live' : '');
+}
+
+function log(msg, type) {
+  const el = document.getElementById('log');
+  const line = document.createElement('div');
+  line.className = 'log-line' + (type ? ' '+type : '');
+  line.textContent = new Date().toLocaleTimeString() + ' · ' + msg;
+  el.prepend(line);
+  if (el.children.length > 30) el.lastChild.remove();
+}
+
+buildPills();
+buildCards();
+</script>
+</body>
+</html>

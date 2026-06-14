@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Hermia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Epilogue:wght@400;500;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fafaf8;--ink:#12110f;--muted:#7a7570;--border:rgba(18,17,15,0.1);--teal:#00897b;--teal-light:#e0f2f0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Epilogue',sans-serif;font-size:15px;line-height:1.7}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(250,250,248,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600}
+.logo-mark{width:28px;height:28px;background:var(--ink);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+nav a.back{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s}
+nav a.back:hover{color:var(--ink)}
+.container{max-width:760px;margin:0 auto;padding:100px 32px 80px}
+.doc-header{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border)}
+.doc-label{font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--teal);font-weight:600;margin-bottom:12px}
+h1{font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:700;line-height:1.1;margin-bottom:16px}
+.doc-meta{font-size:13px;color:var(--muted)}
+.doc-meta a{color:var(--teal);text-decoration:none}
+h2{font-family:'Epilogue',sans-serif;font-size:18px;font-weight:700;margin:36px 0 12px;padding-top:8px;border-top:1px solid var(--border)}
+h3{font-size:15px;font-weight:700;margin:24px 0 8px;color:var(--teal)}
+p{margin-bottom:14px;color:#2a2825}
+ul,ol{padding-left:24px;margin-bottom:14px}
+li{margin-bottom:6px;color:#2a2825}
+.highlight{background:var(--teal-light);border-left:3px solid var(--teal);padding:16px 20px;border-radius:0 6px 6px 0;margin:20px 0}
+.highlight p{margin:0;font-size:14px;color:#004d45}
+a{color:var(--teal);text-decoration:none}
+a:hover{text-decoration:underline}
+.contact-box{background:#f0faf9;border:1px solid rgba(0,137,123,0.2);border-radius:8px;padding:24px;margin-top:40px}
+.contact-box h3{color:var(--ink);margin-top:0}
+footer{text-align:center;padding:32px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);margin-top:60px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo"><div class="logo-mark">H</div>Hermia</a>
+  <a href="index.html" class="back">← Back to hermialabs.io</a>
+</nav>
+
+<div class="container">
+  <div class="doc-header">
+    <div class="doc-label">Legal</div>
+    <h1>Privacy Policy</h1>
+    <div class="doc-meta">
+      Last updated: <strong>1 June 2026</strong> · 
+      Effective date: <strong>1 June 2026</strong> · 
+      Questions? <a href="mailto:privacy@hermialabs.io">privacy@hermialabs.io</a>
+    </div>
+  </div>
+
+  <div class="highlight">
+    <p><strong>Plain English summary:</strong> Hermia processes audio and text to provide live captions and translations. We do not sell your data. We do not store your audio. Transcriptions are processed in real time and discarded. You control your data.</p>
+  </div>
+
+  <h2>1. Who We Are</h2>
+  <p>Hermia ("we", "us", "our") is an accessibility and language access infrastructure platform operated by Hermia Labs. Our registered address is Lagos, Nigeria. We can be contacted at <a href="mailto:privacy@hermialabs.io">privacy@hermialabs.io</a>.</p>
+  <p>We are the data controller for information collected through hermialabs.io and our SDK integrations.</p>
+
+  <h2>2. What Data We Collect</h2>
+
+  <h3>2.1 Audio and Speech Data</h3>
+  <p>When you use Hermia's live captioning feature, your browser captures microphone audio. This audio is:</p>
+  <ul>
+    <li>Processed locally in your browser using the Web Speech API (Google Chrome), OR</li>
+    <li>Sent securely to our servers for processing via Faster-Whisper</li>
+    <li><strong>Never stored permanently</strong> — audio is discarded immediately after transcription</li>
+    <li>Not used for training AI models</li>
+    <li>Not shared with third parties</li>
+  </ul>
+
+  <h3>2.2 Transcription and Translation Text</h3>
+  <p>Text generated from your speech (captions) and translations are:</p>
+  <ul>
+    <li>Processed in real time to deliver the service</li>
+    <li>Temporarily held in memory during your active session only</li>
+    <li>Discarded when your session ends</li>
+    <li>Not linked to your identity unless you are a registered account holder</li>
+  </ul>
+
+  <h3>2.3 Account Information</h3>
+  <p>If you create a Hermia account, we collect:</p>
+  <ul>
+    <li>Name and email address</li>
+    <li>Organisation name (e.g. church name)</li>
+    <li>Website URL for SDK integration</li>
+    <li>Payment information (processed by Paystack or Stripe — we never see your full card number)</li>
+  </ul>
+
+  <h3>2.4 Usage Analytics</h3>
+  <p>We collect aggregated, anonymised usage data including:</p>
+  <ul>
+    <li>Number of sessions and approximate session duration</li>
+    <li>Languages selected (not the content)</li>
+    <li>Browser type and general geographic region (country level only)</li>
+    <li>Errors and performance metrics</li>
+  </ul>
+  <p>This data cannot identify you individually and is used solely to improve the service.</p>
+
+  <h3>2.5 Cookies</h3>
+  <p>We use strictly necessary cookies only for session management. We do not use advertising, tracking, or third-party analytics cookies without your explicit consent. See our Cookie Policy below.</p>
+
+  <h2>3. How We Use Your Data</h2>
+  <p>We use your data only to:</p>
+  <ul>
+    <li>Deliver the captioning and translation service you requested</li>
+    <li>Manage your account and process payments</li>
+    <li>Send you service-related communications (not marketing unless you opt in)</li>
+    <li>Improve service performance and fix errors</li>
+    <li>Comply with legal obligations</li>
+  </ul>
+  <p>We never use your data for advertising, profiling, or selling to third parties.</p>
+
+  <h2>4. Legal Basis for Processing (GDPR)</h2>
+  <p>For users in the European Economic Area (EEA) and United Kingdom, our legal bases for processing are:</p>
+  <ul>
+    <li><strong>Contract performance:</strong> Processing needed to deliver the service you signed up for</li>
+    <li><strong>Legitimate interests:</strong> Improving service quality, security, fraud prevention</li>
+    <li><strong>Legal obligation:</strong> Where required by law</li>
+    <li><strong>Consent:</strong> For optional cookies and marketing communications</li>
+  </ul>
+
+  <h2>5. Data Sharing</h2>
+  <p>We do not sell your data. We share data only with:</p>
+  <ul>
+    <li><strong>Payment processors:</strong> Paystack (for African payments) and Stripe (for international payments) — under their own privacy policies</li>
+    <li><strong>Infrastructure providers:</strong> Render.com (server hosting) and Cloudflare (CDN) — under data processing agreements</li>
+    <li><strong>Legal authorities:</strong> Only when required by law with a valid legal order</li>
+  </ul>
+
+  <h2>6. International Data Transfers</h2>
+  <p>Hermia operates servers in multiple regions. If your data is transferred outside your country, we ensure appropriate safeguards are in place including Standard Contractual Clauses (SCCs) for EEA transfers.</p>
+
+  <h2>7. Data Retention</h2>
+  <ul>
+    <li><strong>Audio data:</strong> Never stored — discarded after real-time processing</li>
+    <li><strong>Session captions:</strong> Discarded at session end</li>
+    <li><strong>Account data:</strong> Retained while your account is active, deleted within 30 days of account closure</li>
+    <li><strong>Payment records:</strong> Retained for 7 years as required by financial regulations</li>
+    <li><strong>Usage analytics:</strong> Retained in anonymised form for up to 24 months</li>
+  </ul>
+
+  <h2>8. Your Rights</h2>
+  <p>Depending on your location, you have the right to:</p>
+  <ul>
+    <li><strong>Access:</strong> Request a copy of your personal data</li>
+    <li><strong>Correction:</strong> Correct inaccurate data</li>
+    <li><strong>Deletion:</strong> Request deletion of your data ("right to be forgotten")</li>
+    <li><strong>Portability:</strong> Receive your data in a machine-readable format</li>
+    <li><strong>Objection:</strong> Object to processing based on legitimate interests</li>
+    <li><strong>Restriction:</strong> Request we limit how we process your data</li>
+    <li><strong>Withdraw consent:</strong> At any time, for consent-based processing</li>
+  </ul>
+  <p>To exercise any right, email <a href="mailto:privacy@hermialabs.io">privacy@hermialabs.io</a>. We respond within 30 days.</p>
+  <p>EEA/UK residents may also lodge a complaint with their local data protection authority.</p>
+
+  <h2>9. Children's Privacy</h2>
+  <p>Hermia is not directed at children under 13. We do not knowingly collect personal data from children under 13. If you believe we have inadvertently collected such data, contact us immediately at <a href="mailto:privacy@hermialabs.io">privacy@hermialabs.io</a>.</p>
+
+  <h2>10. Security</h2>
+  <p>We implement industry-standard security measures including:</p>
+  <ul>
+    <li>HTTPS/TLS encryption for all data in transit</li>
+    <li>Secure WebSocket connections (WSS) for real-time audio</li>
+    <li>API key authentication for SDK integrations</li>
+    <li>No storage of raw audio data</li>
+    <li>Regular security reviews</li>
+  </ul>
+
+  <h2>11. Cookie Policy</h2>
+  <h3>Strictly Necessary Cookies</h3>
+  <p>These are required for the service to function. They cannot be disabled:</p>
+  <ul>
+    <li><code>hermia_session</code> — Keeps you logged in during a session</li>
+    <li><code>hermia_csrf</code> — Prevents cross-site request forgery attacks</li>
+  </ul>
+  <h3>Optional Cookies</h3>
+  <p>We will ask for your consent before setting any non-essential cookies. You can withdraw consent at any time via the cookie banner or by emailing us.</p>
+
+  <h2>12. Nigeria Data Protection Act (NDPA) Compliance</h2>
+  <p>As a Nigerian company, we comply with the Nigeria Data Protection Act 2023 and regulations issued by the Nigeria Data Protection Commission (NDPC). We have a legitimate interest in processing data to deliver our service and process all data lawfully, fairly, and transparently.</p>
+
+  <h2>13. Changes to This Policy</h2>
+  <p>We may update this policy. We will notify registered users by email of material changes at least 14 days before they take effect. Continued use after changes constitutes acceptance.</p>
+
+  <div class="contact-box">
+    <h3>Contact Our Privacy Team</h3>
+    <p>Email: <a href="mailto:privacy@hermialabs.io">privacy@hermialabs.io</a></p>
+    <p>For urgent matters or data breach reports, we respond within 72 hours.</p>
+    <p>Postal: Hermia Labs, Lagos, Nigeria</p>
+  </div>
+</div>
+
+<footer>
+  © 2026 Hermia Labs · <a href="index.html">Home</a> · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="mailto:hello@hermialabs.io">hello@hermialabs.io</a>
+</footer>
+</body>
+</html>

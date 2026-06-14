@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get Started — Hermia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Epilogue:wght@300;400;500;600;700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafaf8;--white:#fff;--ink:#12110f;--muted:#7a7570;
+  --border:rgba(18,17,15,0.1);--teal:#00897b;--teal-light:#e0f2f0;
+  --teal-border:rgba(0,137,123,0.25);--gold:#c4882a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Epilogue',sans-serif;font-size:15px;line-height:1.6;min-height:100vh}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(250,250,248,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600}
+.logo-mark{width:28px;height:28px;background:var(--ink);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+nav a.signin{font-size:13px;color:var(--muted);text-decoration:none}
+nav a.signin:hover{color:var(--ink)}
+
+.page{display:grid;grid-template-columns:1fr 1fr;min-height:100vh;padding-top:60px}
+
+/* Left — hero */
+.left{background:var(--ink);display:flex;flex-direction:column;justify-content:center;padding:80px 60px;position:relative;overflow:hidden}
+.left::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 80%,rgba(0,137,123,0.15) 0%,transparent 60%)}
+.left-content{position:relative;z-index:1}
+.left-label{font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--teal);font-weight:600;margin-bottom:20px}
+.left-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,56px);font-weight:700;line-height:1.05;color:#fff;margin-bottom:20px}
+.left-title em{font-style:italic;color:var(--teal)}
+.left-sub{font-size:15px;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:40px;max-width:380px}
+.features-list{display:flex;flex-direction:column;gap:14px}
+.feat-item{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:rgba(255,255,255,0.65)}
+.feat-item::before{content:'✓';color:var(--teal);font-weight:700;flex-shrink:0;margin-top:1px}
+
+.trust-row{display:flex;align-items:center;gap:16px;margin-top:48px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.08)}
+.trust-item{font-size:12px;color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:6px}
+.trust-item::before{content:'🔒';font-size:14px}
+
+/* Right — form */
+.right{display:flex;flex-direction:column;justify-content:center;padding:60px 60px;background:var(--bg)}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:32px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--white)}
+.tab{flex:1;padding:12px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);border:none;background:transparent;font-family:'Epilogue',sans-serif}
+.tab.active{background:var(--ink);color:#fff}
+.tab:hover:not(.active){background:var(--bg)}
+
+/* Form panels */
+.form-panel{display:none}
+.form-panel.active{display:block}
+
+.form-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;margin-bottom:6px}
+.form-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+
+.field{margin-bottom:18px}
+.field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:7px;background:var(--white);color:var(--ink);font-family:'Epilogue',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal)}
+.field input::placeholder,.field textarea::placeholder{color:rgba(122,117,112,0.5)}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7570' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.plan-select{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+.plan-opt{border:1px solid var(--border);border-radius:8px;padding:14px 12px;cursor:pointer;transition:all .15s;text-align:center;background:var(--white)}
+.plan-opt:hover{border-color:var(--teal-border)}
+.plan-opt.selected{border-color:var(--teal);background:var(--teal-light)}
+.plan-name{font-weight:700;font-size:13px;margin-bottom:4px}
+.plan-price{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--teal)}
+.plan-period{font-size:11px;color:var(--muted)}
+.plan-badge{font-size:10px;background:var(--teal);color:#fff;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px;font-weight:700}
+
+.payment-soon{background:rgba(196,136,42,0.08);border:1px solid rgba(196,136,42,0.2);border-radius:8px;padding:16px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.payment-soon-icon{font-size:20px;flex-shrink:0}
+.payment-soon-text{font-size:13px;color:var(--gold)}
+.payment-soon-text strong{display:block;margin-bottom:2px}
+
+.submit-btn{width:100%;padding:14px;border-radius:8px;background:var(--ink);color:#fff;border:none;cursor:pointer;font-family:'Epilogue',sans-serif;font-weight:700;font-size:15px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.submit-btn:hover{background:var(--teal);transform:translateY(-1px)}
+.submit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.consent{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6}
+.consent a{color:var(--teal);text-decoration:none}
+.consent a:hover{text-decoration:underline}
+
+.checkbox-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.checkbox-row input[type=checkbox]{margin-top:2px;accent-color:var(--teal);width:16px;height:16px;flex-shrink:0}
+.checkbox-row label{font-size:13px;color:var(--muted);cursor:pointer}
+.checkbox-row label a{color:var(--teal)}
+
+/* Success state */
+.success-state{display:none;text-align:center;padding:40px 20px}
+.success-icon{font-size:56px;margin-bottom:20px}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;margin-bottom:12px}
+.success-sub{font-size:14px;color:var(--muted);max-width:380px;margin:0 auto 28px;line-height:1.7}
+.success-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:7px;background:var(--teal);color:#fff;text-decoration:none;font-weight:600;font-size:14px;transition:background .2s}
+.success-btn:hover{background:#00796b}
+
+/* Waitlist tab */
+.waitlist-perks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.perk{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px}
+.perk-icon{font-size:20px;margin-bottom:6px}
+.perk-title{font-weight:600;margin-bottom:2px}
+.perk-sub{font-size:12px;color:var(--muted)}
+.waitlist-count{text-align:center;font-size:13px;color:var(--muted);margin-bottom:20px;padding:10px;background:var(--teal-light);border-radius:6px}
+.waitlist-count strong{color:var(--teal)}
+
+@media(max-width:900px){
+  .page{grid-template-columns:1fr}
+  .left{display:none}
+  .right{padding:80px 24px 40px}
+  .field-row{grid-template-columns:1fr}
+  .plan-select{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><div class="logo-mark">H</div>Hermia</a>
+  <a href="#" class="signin" onclick="switchTab('signin')">Already have an account? Sign in →</a>
+</nav>
+
+<div class="page">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="left-content">
+      <div class="left-label">Get Started Free</div>
+      <div class="left-title">Make your church<br><em>accessible to everyone.</em></div>
+      <div class="left-sub">Join churches and organisations using Hermia to reach every member — regardless of language or hearing ability.</div>
+      <div class="features-list">
+        <div class="feat-item">Live captions in 200+ languages</div>
+        <div class="feat-item">One script tag — no tech team needed</div>
+        <div class="feat-item">Free to start, no credit card required</div>
+        <div class="feat-item">Works with YouTube Live, Vimeo, and custom streams</div>
+        <div class="feat-item">GDPR, NDPA, and accessibility compliant</div>
+      </div>
+      <div class="trust-row">
+        <div class="trust-item">Secure & encrypted</div>
+        <div class="trust-item" style="--before-content:'🌍'">No data sold</div>
+        <div class="trust-item" style="--before-content:'⚡'">Cancel anytime</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+
+    <div class="tabs">
+      <button class="tab active" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+      <button class="tab" id="tab-waitlist" onclick="switchTab('waitlist')">Join Waitlist</button>
+      <button class="tab" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+    </div>
+
+    <!-- SIGNUP PANEL -->
+    <div class="form-panel active" id="panel-signup">
+      <div class="form-title">Create your account</div>
+      <div class="form-sub">Free forever on Starter. No credit card needed.</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" placeholder="Kay" id="firstName">
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" placeholder="Masara" id="lastName">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" placeholder="you@church.org" id="email">
+      </div>
+
+      <div class="field">
+        <label>Organisation Name</label>
+        <input type="text" placeholder="Grace Community Church" id="orgName">
+      </div>
+
+      <div class="field">
+        <label>Organisation Type</label>
+        <select id="orgType">
+          <option value="">Select type…</option>
+          <option value="church">Church / Faith Community</option>
+          <option value="university">University / Education</option>
+          <option value="conference">Conference / Events</option>
+          <option value="broadcast">TV / Broadcast</option>
+          <option value="ngo">NGO / Non-profit</option>
+          <option value="government">Government / Public Sector</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input type="password" placeholder="At least 8 characters" id="password">
+      </div>
+
+      <div class="field">
+        <label>Choose a Plan</label>
+        <div class="plan-select">
+          <div class="plan-opt selected" onclick="selectPlan(this,'free')">
+            <div class="plan-name">Starter</div>
+            <div class="plan-price">$0</div>
+            <div class="plan-period">/month</div>
+          </div>
+          <div class="plan-opt" onclick="selectPlan(this,'pro')">
+            <div class="plan-name">Pro</div>
+            <div class="plan-price">$49</div>
+            <div class="plan-period">/month</div>
+            <div class="plan-badge">Popular</div>
+          </div>
+          <div class="plan-opt" onclick="selectPlan(this,'enterprise')">
+            <div class="plan-name">Enterprise</div>
+            <div class="plan-price" style="font-size:18px">Custom</div>
+            <div class="plan-period">contact us</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-soon" id="paymentNotice" style="display:none">
+        <div class="payment-soon-icon">⏳</div>
+        <div class="payment-soon-text">
+          <strong>Payments coming soon</strong>
+          We'll email you when billing is ready. You can start using the free tier now and upgrade later.
+        </div>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="terms">
+        <label for="terms">I agree to Hermia's <a href="terms.html" target="_blank">Terms of Service</a> and <a href="privacy.html" target="_blank">Privacy Policy</a></label>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="marketing">
+        <label for="marketing">Send me updates about new features and languages (optional)</label>
+      </div>
+
+      <button class="submit-btn" onclick="handleSignup()">
+        Create Free Account →
+      </button>
+
+      <div class="consent">
+        By creating an account you acknowledge that Hermia will process your data as described in our <a href="privacy.html">Privacy Policy</a>. Your audio is never stored. We comply with GDPR, CCPA, and the Nigeria Data Protection Act.
+      </div>
+    </div>
+
+    <!-- WAITLIST PANEL -->
+    <div class="form-panel" id="panel-waitlist">
+      <div class="form-title">Join the waitlist</div>
+      <div class="form-sub">Be first to access new features, priority onboarding, and early pricing.</div>
+
+      <div class="waitlist-count">
+        <strong>247 organisations</strong> already on the waitlist
+      </div>
+
+      <div class="waitlist-perks">
+        <div class="perk"><div class="perk-icon">🚀</div><div class="perk-title">Early Access</div><div class="perk-sub">First to try new languages and features</div></div>
+        <div class="perk"><div class="perk-icon">💰</div><div class="perk-title">Founding Price</div><div class="perk-sub">Locked-in rate for early members</div></div>
+        <div class="perk"><div class="perk-icon">🎯</div><div class="perk-title">Priority Support</div><div class="perk-sub">Direct line to the founding team</div></div>
+        <div class="perk"><div class="perk-icon">🤝</div><div class="perk-title">Shape the Product</div><div class="perk-sub">Your feedback builds Hermia</div></div>
+      </div>
+
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" placeholder="Pastor James Okafor" id="wlName">
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" placeholder="pastor@gracechurch.org" id="wlEmail">
+      </div>
+
+      <div class="field">
+        <label>Organisation</label>
+        <input type="text" placeholder="Grace Community Church" id="wlOrg">
+      </div>
+
+      <div class="field">
+        <label>How many people attend your services?</label>
+        <select id="wlSize">
+          <option value="">Select size…</option>
+          <option value="small">Under 100</option>
+          <option value="medium">100–500</option>
+          <option value="large">500–2,000</option>
+          <option value="xlarge">2,000+</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>What languages does your congregation speak? (optional)</label>
+        <input type="text" placeholder="e.g. Yoruba, French, Igbo, English" id="wlLangs">
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="wlTerms">
+        <label for="wlTerms">I agree to Hermia's <a href="terms.html" target="_blank">Terms of Service</a> and <a href="privacy.html" target="_blank">Privacy Policy</a></label>
+      </div>
+
+      <button class="submit-btn" onclick="handleWaitlist()">
+        Join the Waitlist →
+      </button>
+    </div>
+
+    <!-- SIGNIN PANEL -->
+    <div class="form-panel" id="panel-signin">
+      <div class="form-title">Welcome back</div>
+      <div class="form-sub">Sign in to your Hermia dashboard</div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" placeholder="you@church.org" id="siEmail">
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input type="password" placeholder="Your password" id="siPassword">
+      </div>
+
+      <button class="submit-btn" onclick="handleSignin()">
+        Sign In →
+      </button>
+
+      <div class="divider">or</div>
+
+      <div style="text-align:center;font-size:13px;color:var(--muted)">
+        Don't have an account? <a href="#" onclick="switchTab('signup')" style="color:var(--teal)">Create one free →</a>
+      </div>
+
+      <div style="text-align:center;margin-top:12px;font-size:13px">
+        <a href="#" onclick="handleForgot()" style="color:var(--muted);text-decoration:none">Forgot password?</a>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-state" id="successState">
+      <div class="success-icon">🎉</div>
+      <div class="success-title" id="successTitle">You're in!</div>
+      <div class="success-sub" id="successSub">Check your email to verify your account. Then head to your dashboard to get your embed code.</div>
+      <a href="hermia-dashboard.html" class="success-btn">Go to Dashboard →</a>
+      <div style="margin-top:16px">
+        <a href="hermia-demo.html" style="font-size:13px;color:var(--muted);text-decoration:none">Or try the live demo first ↗</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let selectedPlan = 'free';
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab)?.classList.add('active');
+  document.getElementById('panel-' + tab)?.classList.add('active');
+  document.getElementById('successState').style.display = 'none';
+}
+
+function selectPlan(el, plan) {
+  document.querySelectorAll('.plan-opt').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlan = plan;
+  document.getElementById('paymentNotice').style.display = (plan !== 'free') ? 'flex' : 'none';
+}
+
+function validate(fields) {
+  for (const [id, label] of fields) {
+    const el = document.getElementById(id);
+    if (!el?.value?.trim()) {
+      el?.focus();
+      showError(`Please enter your ${label}`);
+      return false;
+    }
+  }
+  return true;
+}
+
+function showError(msg) {
+  const existing = document.querySelector('.error-toast');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'error-toast';
+  el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#d94f3d;color:#fff;padding:12px 24px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;animation:fadeIn .3s ease';
+  el.textContent = '⚠ ' + msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function showSuccess(title, sub) {
+  document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('successTitle').textContent = title;
+  document.getElementById('successSub').textContent = sub;
+  document.getElementById('successState').style.display = 'block';
+}
+
+function handleSignup() {
+  if (!validate([['firstName','first name'],['lastName','last name'],['email','email'],['orgName','organisation name'],['password','password']])) return;
+  if (!document.getElementById('terms').checked) { showError('Please agree to the Terms of Service'); return; }
+  const pw = document.getElementById('password').value;
+  if (pw.length < 8) { showError('Password must be at least 8 characters'); return; }
+  const btn = document.querySelector('#panel-signup .submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Creating account…';
+  // Simulate API call
+  setTimeout(() => {
+    showSuccess('Account created! 🎉', `We've sent a verification email to ${document.getElementById('email').value}. Check your inbox then head to your dashboard.`);
+  }, 1500);
+}
+
+function handleWaitlist() {
+  if (!validate([['wlName','name'],['wlEmail','email'],['wlOrg','organisation']])) return;
+  if (!document.getElementById('wlTerms').checked) { showError('Please agree to the Terms of Service'); return; }
+  const btn = document.querySelector('#panel-waitlist .submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Joining…';
+  setTimeout(() => {
+    showSuccess("You're on the waitlist! 🌍", `We'll email ${document.getElementById('wlEmail').value} when your access is ready. Expect to hear from us within 48 hours.`);
+  }, 1200);
+}
+
+function handleSignin() {
+  if (!validate([['siEmail','email'],['siPassword','password']])) return;
+  const btn = document.querySelector('#panel-signin .submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  setTimeout(() => {
+    window.location.href = 'hermia-dashboard.html';
+  }, 1000);
+}
+
+function handleForgot() {
+  const email = document.getElementById('siEmail').value;
+  if (!email) { showError('Enter your email address first'); return; }
+  showSuccess('Check your email', `We've sent a password reset link to ${email}. Check your inbox.`);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermia — Live Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Epilogue:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0f0e;
+  --surface: #111916;
+  --surface2: #172019;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8ede8;
+  --muted: rgba(232,237,232,0.45);
+  --muted2: rgba(232,237,232,0.22);
+  --teal: #00c9a0;
+  --teal-dim: rgba(0,201,160,0.12);
+  --teal-border: rgba(0,201,160,0.25);
+  --gold: #d4a843;
+  --red: #ff5252;
+  --accent: #00c9a0;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Epilogue',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:54px;
+  background:rgba(11,15,14,0.9);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-mark{width:28px;height:28px;background:var(--teal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:16px;color:#000}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:0.02em}
+.topbar-mid{display:flex;align-items:center;gap:12px}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(255,82,82,0.12);border:1px solid rgba(255,82,82,0.25);padding:4px 12px;border-radius:100px;font-family:'Epilogue',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--red);display:none}
+.live-dot{width:5px;height:5px;background:var(--red);border-radius:50%;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.5)}}
+.viewer-pill{font-size:12px;color:var(--muted);display:none}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.tbtn{padding:7px 16px;border-radius:5px;font-family:'Epilogue',sans-serif;font-weight:600;font-size:12px;text-decoration:none;transition:all .2s;cursor:pointer;border:none}
+.tbtn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border2)}
+.tbtn-ghost:hover{color:var(--text);border-color:var(--border2)}
+.tbtn-teal{background:var(--teal);color:#000}
+.tbtn-teal:hover{background:#00e5b7;transform:translateY(-1px)}
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:1fr 368px;padding-top:54px;min-height:100vh}
+
+/* ── MAIN ── */
+.main{display:flex;flex-direction:column;border-right:1px solid var(--border)}
+
+.video-zone{position:relative;background:#000;overflow:hidden;aspect-ratio:16/9;max-height:calc(100vh - 54px - 130px)}
+
+/* placeholder */
+.placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;background:linear-gradient(150deg,#0d1512 0%,#080e0c 100%)}
+.ph-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,201,160,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,201,160,0.03) 1px,transparent 1px);background-size:44px 44px}
+.ph-glow{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,201,160,0.07) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%)}
+.ph-inner{position:relative;z-index:1}
+.ph-icon{font-size:40px;margin-bottom:16px;opacity:0.5}
+.ph-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;font-style:italic;color:rgba(255,255,255,0.6);margin-bottom:6px}
+.ph-sub{font-size:12px;color:var(--muted2);margin-bottom:28px}
+.url-row{display:flex;gap:0;width:360px;max-width:90vw}
+.url-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-right:none;padding:10px 16px;border-radius:6px 0 0 6px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border-color .2s}
+.url-input::placeholder{color:var(--muted2)}
+.url-input:focus{border-color:var(--teal)}
+.url-go{background:var(--teal);color:#000;border:none;padding:10px 20px;border-radius:0 6px 6px 0;cursor:pointer;font-family:'Epilogue',sans-serif;font-weight:700;font-size:13px;transition:background .2s}
+.url-go:hover{background:#00e5b7}
+
+/* stream sim */
+.stream-sim{position:absolute;inset:0;display:none;align-items:center;justify-content:center}
+.stream-sim.on{display:flex}
+.stream-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,#0d1f1a 0%,#060e0b 100%)}
+.stream-content{position:relative;z-index:1;text-align:center}
+.speaker-avi{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#1a2e28,#0e1e18);border:1.5px solid rgba(0,201,160,0.2);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;position:relative}
+.speak-ring{position:absolute;inset:-8px;border-radius:50%;border:1.5px solid var(--teal);opacity:0;animation:speakring 2.2s ease-in-out infinite}
+@keyframes speakring{0%,100%{transform:scale(1);opacity:0}40%{opacity:0.5}70%{transform:scale(1.18);opacity:0}}
+.spk-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;margin-bottom:3px}
+.spk-role{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.wavebars{display:flex;gap:3px;align-items:flex-end;justify-content:center;height:28px;margin-top:18px}
+.wavebars span{width:3px;border-radius:2px;background:var(--teal);animation:wavebar 1.1s ease-in-out infinite}
+.wavebars span:nth-child(1){animation-delay:0s}
+.wavebars span:nth-child(2){animation-delay:.12s}
+.wavebars span:nth-child(3){animation-delay:.22s}
+.wavebars span:nth-child(4){animation-delay:.08s}
+.wavebars span:nth-child(5){animation-delay:.18s}
+.wavebars span:nth-child(6){animation-delay:.28s}
+.wavebars span:nth-child(7){animation-delay:.05s}
+@keyframes wavebar{0%,100%{height:3px}50%{height:24px}}
+
+/* caption zone */
+.caption-zone{
+  flex:1;padding:20px 28px;
+  background:var(--surface);border-top:1px solid var(--border);
+  min-height:130px;display:flex;flex-direction:column;justify-content:space-between;
+}
+.cap-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.cap-lang-flag{font-size:18px}
+.cap-lang-name{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:600;flex:1}
+.cap-ctrl-row{display:flex;gap:6px}
+.ccbtn{padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .2s}
+.ccbtn:hover,.ccbtn.on{background:var(--teal);color:#000;border-color:var(--teal)}
+.cap-body{font-family:'Cormorant Garamond',serif}
+.cap-prev{font-size:17px;font-style:italic;color:var(--muted2);margin-bottom:4px;min-height:24px}
+.cap-curr{font-size:24px;line-height:1.35;color:var(--text);min-height:34px}
+.cap-cursor{display:inline-block;width:2px;height:20px;background:var(--teal);margin-left:3px;vertical-align:middle;animation:cblink .85s step-end infinite}
+@keyframes cblink{0%,100%{opacity:1}50%{opacity:0}}
+.cap-meta{display:flex;align-items:center;gap:14px;margin-top:8px}
+.cap-latency{font-size:11px;color:var(--teal);display:flex;align-items:center;gap:5px;display:none}
+.latdot{width:5px;height:5px;background:var(--teal);border-radius:50%;animation:pulse 1.5s infinite}
+
+/* ── SIDE PANEL ── */
+.side{display:flex;flex-direction:column;background:var(--surface);overflow-y:auto;max-height:calc(100vh - 54px)}
+
+.side-sec{padding:18px 20px;border-bottom:1px solid var(--border)}
+.side-title{font-family:'Epilogue',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.side-title span{color:var(--teal);font-size:10px;font-weight:600}
+
+/* demo btn */
+.demo-btn{width:100%;padding:13px;border-radius:7px;background:var(--teal);color:#000;border:none;cursor:pointer;font-family:'Epilogue',sans-serif;font-weight:800;font-size:14px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:0.02em}
+.demo-btn:hover{background:#00e5b7;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,201,160,0.25)}
+.demo-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none}
+.status-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11px;color:var(--teal);display:none}
+
+/* lang search */
+.lang-search{width:100%;background:var(--surface2);border:1px solid var(--border);padding:8px 14px;border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;margin-bottom:12px;transition:border-color .2s}
+.lang-search::placeholder{color:var(--muted2)}
+.lang-search:focus{border-color:var(--teal)}
+
+/* continent groups */
+.cont-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted2);padding:6px 0 8px;display:flex;align-items:center;gap:8px}
+.cont-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.lang-list{display:flex;flex-direction:column;gap:2px}
+.lang-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;transition:background .15s;border:1px solid transparent}
+.lang-row:hover{background:var(--surface2)}
+.lang-row.sel{background:var(--teal-dim);border-color:var(--teal-border)}
+.lang-row.sel .lname{color:var(--teal)}
+.lflag{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.lname{font-size:13px;flex:1;font-weight:500}
+.lnat{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2)}
+.lcheck{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:8px;color:transparent;transition:all .2s}
+.lang-row.sel .lcheck{background:var(--teal);border-color:var(--teal);color:#000}
+
+/* mode */
+.mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mode-opt{padding:10px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);cursor:pointer;text-align:center;transition:all .2s;color:var(--muted)}
+.mode-opt:hover{border-color:var(--border2);color:var(--text)}
+.mode-opt.on{border-color:var(--teal);background:var(--teal-dim);color:var(--teal)}
+.mico{font-size:18px;margin-bottom:3px}
+.mlbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;font-family:'Epilogue',sans-serif}
+
+/* size */
+.size-row{display:flex;align-items:center;gap:10px}
+.sz-btn{width:34px;height:34px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--text);font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.sz-btn:hover{border-color:var(--teal);color:var(--teal)}
+.sz-val{flex:1;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:7px;font-family:'DM Mono',monospace;font-size:12px}
+
+/* toggles */
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.tog-row:last-child{border:none}
+.tog-info .tl{font-size:13px;font-weight:500}
+.tog-info .ts{font-size:11px;color:var(--muted2)}
+.tog{position:relative;width:38px;height:20px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tog-sl{position:absolute;inset:0;background:var(--surface2);border:1px solid var(--border2);border-radius:100px;cursor:pointer;transition:.2s}
+.tog-sl::before{content:'';position:absolute;width:14px;height:14px;left:2px;top:50%;transform:translateY(-50%);background:var(--muted);border-radius:50%;transition:.2s}
+.tog input:checked+.tog-sl{background:var(--teal);border-color:var(--teal)}
+.tog input:checked+.tog-sl::before{left:21px;background:#000}
+
+/* translations */
+.trans-list{padding:18px 20px;flex:1}
+.trans-item{padding:14px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);margin-bottom:10px;transition:border-color .2s}
+.trans-item:hover{border-color:var(--teal-border)}
+.trans-top{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.trans-flag{font-size:17px}
+.trans-lname{font-family:'Epilogue',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;flex:1}
+.trans-ping{font-size:10px;color:var(--teal);display:flex;align-items:center;gap:4px}
+.trans-text{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--muted);line-height:1.5}
+.trans-audio{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;color:var(--teal);cursor:pointer;background:var(--teal-dim);border:1px solid var(--teal-border);padding:3px 10px;border-radius:3px;transition:all .2s;font-family:'Epilogue',sans-serif;font-weight:600}
+.trans-audio:hover{background:rgba(0,201,160,0.2)}
+
+/* fullscreen overlay */
+.fs-overlay{position:fixed;inset:0;z-index:300;background:#000;display:none;flex-direction:column;align-items:center;justify-content:flex-end;padding:48px}
+.fs-overlay.on{display:flex}
+.fs-cap{width:100%;max-width:960px;text-align:center}
+.fs-prev{font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;color:rgba(255,255,255,0.3);margin-bottom:16px}
+.fs-curr{font-family:'Cormorant Garamond',serif;font-size:52px;line-height:1.2;color:#fff;font-weight:600}
+.fs-curr.hc{color:#ff0;background:#000;padding:8px 20px;border-radius:4px}
+.fs-close{position:fixed;top:20px;right:20px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 16px;border-radius:5px;cursor:pointer;font-family:'Epilogue',sans-serif;font-weight:700;font-size:12px}
+
+/* toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--surface2);border:1px solid var(--border2);padding:10px 22px;border-radius:6px;font-size:12px;z-index:500;transition:transform .25s ease;display:flex;align-items:center;gap:8px;white-space:nowrap;font-family:'Epilogue',sans-serif;font-weight:500}
+.toast.on{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:880px){
+  .app{grid-template-columns:1fr}
+  .side{max-height:none;border-top:1px solid var(--border)}
+  .video-zone{max-height:220px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="logo">
+    <div class="logo-mark">H</div>
+    <span class="logo-name">Hermia</span>
+  </a>
+  <div class="topbar-mid">
+    <div class="live-badge" id="liveBadge"><span class="live-dot"></span>Live</div>
+    <span class="viewer-pill" id="viewerPill"></span>
+  </div>
+  <div class="topbar-right">
+    <a href="index.html" class="tbtn tbtn-ghost">← Back to site</a>
+    <a href="#" class="tbtn tbtn-teal">Get API Key →</a>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app">
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="video-zone">
+
+      <!-- Placeholder -->
+      <div class="placeholder" id="placeholder">
+        <div class="ph-grid"></div>
+        <div class="ph-glow"></div>
+        <div class="ph-inner">
+          <div class="ph-icon">📡</div>
+          <div class="ph-title">Connect a stream, or run the demo</div>
+          <div class="ph-sub">Paste any livestream URL, or click Run Demo below</div>
+          <div class="url-row">
+            <input class="url-input" placeholder="https://youtube.com/live/…" id="urlInput">
+            <button class="url-go" onclick="startDemo()">Connect</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stream simulation -->
+      <div class="stream-sim" id="streamSim">
+        <div class="stream-bg"></div>
+        <div class="stream-content">
+          <div class="speaker-avi">⛪<div class="speak-ring"></div></div>
+          <div class="spk-name">Pastor James Okafor</div>
+          <div class="spk-role">Sunday Service · Grace Community Church</div>
+          <div class="wavebars">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPTIONS -->
+    <div class="caption-zone">
+      <div class="cap-header">
+        <span class="cap-lang-flag" id="capFlag">🌐</span>
+        <span class="cap-lang-name" id="capLangName">Select a language →</span>
+        <div class="cap-ctrl-row">
+          <button class="ccbtn on" onclick="setMode('captions')">CC</button>
+          <button class="ccbtn" onclick="setMode('audio')">🔊</button>
+          <button class="ccbtn" onclick="setMode('both')">CC+🔊</button>
+          <button class="ccbtn" onclick="toggleFS()">⛶</button>
+        </div>
+      </div>
+      <div class="cap-body">
+        <div class="cap-prev" id="capPrev"></div>
+        <div class="cap-curr" id="capCurr">Captions appear here when the demo starts…<span class="cap-cursor"></span></div>
+      </div>
+      <div class="cap-meta">
+        <div class="cap-latency" id="capLatency">
+          <span class="latdot"></span>
+          <span id="latMs">1.4s</span> · Faster-Whisper + NLLB-200
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div class="side">
+
+    <!-- Demo trigger -->
+    <div class="side-sec">
+      <button class="demo-btn" id="demoBtn" onclick="startDemo()">▶ Run Live Demo</button>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="tbtn tbtn-ghost" id="audioToggleBtn" onclick="toggleSpeech()" style="flex:1;padding:9px;font-size:12px;border-radius:6px;cursor:pointer">🔊 Audio On</button>
+        <button class="tbtn tbtn-ghost" onclick="speechSynthesis.cancel();toast('⏹ Audio stopped')" style="flex:1;padding:9px;font-size:12px;border-radius:6px;cursor:pointer">⏹ Stop</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted2);margin-top:8px;line-height:1.5">Switch to <strong style="color:var(--teal)">Audio</strong> or <strong style="color:var(--teal)">Both</strong> mode below to hear translations spoken aloud.</div>
+      <div class="status-row" id="statusRow">
+        <span class="latdot"></span>
+        <span id="statusTxt">Connecting…</span>
+      </div>
+    </div>
+
+    <!-- Language -->
+    <div class="side-sec">
+      <div class="side-title">🌐 Caption Language <span id="selCount">English enabled</span></div>
+      <input class="lang-search" placeholder="Search 200+ languages…" id="langSearch" oninput="filterLangs()">
+      <div id="langList"></div>
+    </div>
+
+    <!-- Mode -->
+    <div class="side-sec">
+      <div class="side-title">Output Mode</div>
+      <div class="mode-row">
+        <div class="mode-opt on" id="m-captions" onclick="setMode('captions')"><div class="mico">📝</div><div class="mlbl">Captions</div></div>
+        <div class="mode-opt" id="m-audio" onclick="setMode('audio')"><div class="mico">🔊</div><div class="mlbl">Audio</div></div>
+        <div class="mode-opt" id="m-both" onclick="setMode('both')"><div class="mico">✨</div><div class="mlbl">Both</div></div>
+      </div>
+    </div>
+
+    <!-- Size -->
+    <div class="side-sec">
+      <div class="side-title">Caption Size</div>
+      <div class="size-row">
+        <button class="sz-btn" onclick="chSize(-2)">A−</button>
+        <div class="sz-val" id="szVal">24px</div>
+        <button class="sz-btn" onclick="chSize(2)">A+</button>
+      </div>
+    </div>
+
+    <!-- Accessibility -->
+    <div class="side-sec">
+      <div class="side-title">Accessibility</div>
+      <div class="tog-row">
+        <div class="tog-info"><div class="tl">High Contrast</div><div class="ts">Yellow on black</div></div>
+        <label class="tog"><input type="checkbox" id="togHC" onchange="applyA11y()"><span class="tog-sl"></span></label>
+      </div>
+      <div class="tog-row">
+        <div class="tog-info"><div class="tl">Large Captions</div><div class="ts">Increases size to 32px</div></div>
+        <label class="tog"><input type="checkbox" id="togLarge" onchange="applyA11y()"><span class="tog-sl"></span></label>
+      </div>
+      <div class="tog-row">
+        <div class="tog-info"><div class="tl">Caption Background</div><div class="ts">Dark band behind text</div></div>
+        <label class="tog"><input type="checkbox" id="togBg" onchange="applyA11y()"><span class="tog-sl"></span></label>
+      </div>
+    </div>
+
+    <!-- Live translations -->
+    <div class="trans-list">
+      <div class="side-title" style="margin-bottom:14px">Live Translations <span id="transCount"></span></div>
+      <div id="transList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FULLSCREEN -->
+<div class="fs-overlay" id="fsOverlay">
+  <button class="fs-close" onclick="toggleFS()">✕ Exit</button>
+  <div class="fs-cap">
+    <div class="fs-prev" id="fsPrev"></div>
+    <div class="fs-curr" id="fsCurr">Waiting for captions…</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+// ── LANGUAGE DATA ──
+const LANGS = [
+  // Africa
+  {code:'sw',name:'Swahili',native:'Kiswahili',flag:'🇹🇿',cont:'Africa'},
+  {code:'am',name:'Amharic',native:'አማርኛ',flag:'🇪🇹',cont:'Africa'},
+  {code:'yo',name:'Yoruba',native:'Yorùbá',flag:'🇳🇬',cont:'Africa'},
+  {code:'ha',name:'Hausa',native:'Hausa',flag:'🇳🇬',cont:'Africa'},
+  {code:'ig',name:'Igbo',native:'Igbo',flag:'🇳🇬',cont:'Africa'},
+  {code:'zu',name:'Zulu',native:'isiZulu',flag:'🇿🇦',cont:'Africa'},
+  {code:'xh',name:'Xhosa',native:'isiXhosa',flag:'🇿🇦',cont:'Africa'},
+  {code:'so',name:'Somali',native:'Soomaali',flag:'🇸🇴',cont:'Africa'},
+  {code:'tw',name:'Twi',native:'Twi',flag:'🇬🇭',cont:'Africa'},
+  {code:'wo',name:'Wolof',native:'Wolof',flag:'🇸🇳',cont:'Africa'},
+  {code:'om',name:'Oromo',native:'Afaan Oromoo',flag:'🇪🇹',cont:'Africa'},
+  // Europe
+  {code:'en',name:'English',native:'English',flag:'🇬🇧',cont:'Europe'},
+  {code:'fr',name:'French',native:'Français',flag:'🇫🇷',cont:'Europe'},
+  {code:'es',name:'Spanish',native:'Español',flag:'🇪🇸',cont:'Europe'},
+  {code:'de',name:'German',native:'Deutsch',flag:'🇩🇪',cont:'Europe'},
+  {code:'it',name:'Italian',native:'Italiano',flag:'🇮🇹',cont:'Europe'},
+  {code:'pt',name:'Portuguese',native:'Português',flag:'🇵🇹',cont:'Europe'},
+  {code:'pl',name:'Polish',native:'Polski',flag:'🇵🇱',cont:'Europe'},
+  {code:'nl',name:'Dutch',native:'Nederlands',flag:'🇳🇱',cont:'Europe'},
+  {code:'ru',name:'Russian',native:'Русский',flag:'🇷🇺',cont:'Europe'},
+  {code:'uk',name:'Ukrainian',native:'Українська',flag:'🇺🇦',cont:'Europe'},
+  {code:'ro',name:'Romanian',native:'Română',flag:'🇷🇴',cont:'Europe'},
+  {code:'el',name:'Greek',native:'Ελληνικά',flag:'🇬🇷',cont:'Europe'},
+  {code:'sv',name:'Swedish',native:'Svenska',flag:'🇸🇪',cont:'Europe'},
+  // Asia
+  {code:'ar',name:'Arabic',native:'العربية',flag:'🇸🇦',cont:'Asia'},
+  {code:'hi',name:'Hindi',native:'हिन्दी',flag:'🇮🇳',cont:'Asia'},
+  {code:'bn',name:'Bengali',native:'বাংলা',flag:'🇧🇩',cont:'Asia'},
+  {code:'zh',name:'Mandarin',native:'中文',flag:'🇨🇳',cont:'Asia'},
+  {code:'ja',name:'Japanese',native:'日本語',flag:'🇯🇵',cont:'Asia'},
+  {code:'ko',name:'Korean',native:'한국어',flag:'🇰🇷',cont:'Asia'},
+  {code:'tl',name:'Filipino',native:'Filipino',flag:'🇵🇭',cont:'Asia'},
+  {code:'vi',name:'Vietnamese',native:'Tiếng Việt',flag:'🇻🇳',cont:'Asia'},
+  {code:'id',name:'Indonesian',native:'Bahasa',flag:'🇮🇩',cont:'Asia'},
+  {code:'ur',name:'Urdu',native:'اردو',flag:'🇵🇰',cont:'Asia'},
+  {code:'tr',name:'Turkish',native:'Türkçe',flag:'🇹🇷',cont:'Asia'},
+  {code:'fa',name:'Persian',native:'فارسی',flag:'🇮🇷',cont:'Asia'},
+  {code:'ta',name:'Tamil',native:'தமிழ்',flag:'🇮🇳',cont:'Asia'},
+  {code:'he',name:'Hebrew',native:'עברית',flag:'🇮🇱',cont:'Asia'},
+  // Americas
+  {code:'pt-br',name:'Portuguese (BR)',native:'Português do Brasil',flag:'🇧🇷',cont:'Americas'},
+  {code:'es-mx',name:'Spanish (MX)',native:'Español Mexicano',flag:'🇲🇽',cont:'Americas'},
+  {code:'ht',name:'Haitian Creole',native:'Kreyòl ayisyen',flag:'🇭🇹',cont:'Americas'},
+  // Oceania
+  {code:'mi',name:'Māori',native:'Te Reo Māori',flag:'🇳🇿',cont:'Oceania'},
+  {code:'sm',name:'Samoan',native:'Gagana Samoa',flag:'🇼🇸',cont:'Oceania'},
+  {code:'to',name:'Tongan',native:'Lea Fakatonga',flag:'🇹🇴',cont:'Oceania'},
+];
+
+// Sermon demo content
+const SERMON = [
+  "Good morning. Welcome to Grace Community Church — to everyone joining us here and online.",
+  "Today, no matter what language you speak, Hermia is making sure every word reaches you.",
+  "Our message today is simple: every voice matters. Every person deserves to be included.",
+  "Faith is not the absence of doubt. Faith is choosing to move forward, together, anyway.",
+  "No language should be a barrier to understanding. No disability should be a barrier to participation.",
+  "Whether you are in London, Lagos, Manila, or São Paulo — this message is for you.",
+  "Hermia exists so that organizations like ours never have to choose who gets left out.",
+  "Because everyone — in their own language, in their own way — deserves to hear and be heard.",
+  "Let us open our hearts to what has been prepared for each and every one of us today.",
+  "Every voice. Every language. Everyone included.",
+];
+
+const TRANS = {
+  fr:["Bonjour. Bienvenue à l'Église Communautaire de Grâce — à tous ceux qui se joignent à nous.","Aujourd'hui, quelle que soit votre langue, Hermia s'assure que chaque mot vous parvient.","Notre message est simple : chaque voix compte. Chaque personne mérite d'être incluse.","La foi n'est pas l'absence du doute. La foi, c'est choisir d'avancer ensemble quand même.","Aucune langue ne devrait être une barrière à la compréhension. Aucun handicap à la participation.","Que vous soyez à Londres, Lagos, Manille ou São Paulo — ce message est pour vous.","Hermia existe pour que des organisations comme la nôtre n'aient jamais à choisir qui est exclu.","Car chacun — dans sa propre langue, à sa façon — mérite d'entendre et d'être entendu.","Ouvrons nos cœurs à ce qui a été préparé pour chacun d'entre nous aujourd'hui.","Chaque voix. Chaque langue. Tout le monde inclus."],
+  es:["Buenos días. Bienvenidos a la Iglesia Comunitaria de Gracia — a todos los que se unen con nosotros.","Hoy, sin importar el idioma que hables, Hermia se asegura de que cada palabra te llegue.","Nuestro mensaje es simple: cada voz importa. Cada persona merece estar incluida.","La fe no es la ausencia de duda. La fe es elegir avanzar juntos de todas formas.","Ningún idioma debería ser una barrera para entender. Ninguna discapacidad para participar.","Estés en Londres, Lagos, Manila o São Paulo — este mensaje es para ti.","Hermia existe para que organizaciones como la nuestra nunca tengan que elegir quién queda fuera.","Porque todos — en su propio idioma, a su manera — merecen escuchar y ser escuchados.","Abramos nuestros corazones a lo que ha sido preparado para cada uno de nosotros hoy.","Cada voz. Cada idioma. Todos incluidos."],
+  sw:["Habari za asubuhi. Karibu Kanisa la Jumuiya ya Neema — kwa wote wanaojiunga nasi mtandaoni.","Leo, bila kujali lugha unayoongea, Hermia inahakikisha kila neno linakufikia.","Ujumbe wetu ni rahisi: kila sauti ina umuhimu. Kila mtu anastahili kujumuishwa.","Imani si kutokuwa na shaka. Imani ni kuchagua kuendelea pamoja hata hivyo.","Hakuna lugha inayopaswa kuwa kikwazo cha kuelewa. Hakuna ulemavu kuwa kikwazo cha kushiriki.","Iwe uko London, Lagos, Manila, au São Paulo — ujumbe huu ni kwa ajili yako.","Hermia ipo ili mashirika kama yetu yasichagua nani atabaki nje.","Kwa sababu kila mtu — kwa lugha yake mwenyewe — anastahili kusikia na kusikiwa.","Tufungue mioyo yetu kwa kile kilichotayarishwa kwa kila mmoja wetu leo.","Kila sauti. Kila lugha. Kila mtu amejumuishwa."],
+  ar:["صباح الخير. أهلاً بكم في كنيسة غريس المجتمعية — لجميع المنضمين إلينا هنا وعبر الإنترنت.","اليوم، بغض النظر عن اللغة التي تتحدثها، تضمن هيرميا وصول كل كلمة إليك.","رسالتنا بسيطة: كل صوت يهم. كل شخص يستحق أن يُشمل.","الإيمان ليس غياب الشك. الإيمان هو اختيار المضي قدماً معاً على أي حال.","لا ينبغي أن تكون أي لغة عائقاً للفهم. ولا أي إعاقة عائقاً للمشاركة.","سواء كنت في لندن أو لاغوس أو مانيلا أو ساو باولو — هذه الرسالة لك.","هيرميا موجودة حتى لا تضطر منظمات مثلنا أبداً إلى اختيار من يُستثنى.","لأن الجميع — بلغتهم الخاصة — يستحقون السماع والاستماع.","لنفتح قلوبنا لما أُعدّ لكل واحد منا اليوم.","كل صوت. كل لغة. الجميع مشمولون."],
+  yo:["Ẹ káàárọ̀. Ẹ káàbọ̀ sí Ṣọọ̀ṣì Àwùjọ Grace — fún gbogbo àwọn tó darapọ̀ mọ́ wa.","Lónìí, bíi èdè tí o bá ń sọ̀rọ̀, Hermia ń ríi dájú pé gbogbo ọ̀rọ̀ dé ọ.","Ọ̀rọ̀ wa rọrùn: gbogbo ohùn ní ìjẹmọ. Gbogbo ènìyàn tọ́ láti wà nínú.","Ìgbàgbọ́ kọ́ ìyèméjì. Ìgbàgbọ́ ni láti yan ìgbésẹ̀ síwájú papọ̀.","Kò sí èdè tí ó yẹ kí ó jẹ́ ìdènà. Kò sí àìsàn tí ó yẹ kí ó dènà ìkópa.","Bóyá o wà ní Lọndọnu, Lagos, Manila, tàbí São Paulo — ọ̀rọ̀ yìí jẹ́ fún ọ.","Hermia wà kí àwọn àjọ bíi tiwa má ní láti yan ẹni tó yóò jáde.","Nítorí gbogbo ènìyàn — nínú èdè tirẹ̀ — tọ́ láti gbọ́ àti láti gbọ́ràn.","Jẹ́ ká ṣí ọkàn wa sí ohun tí a ti pèsè fún ọkọọkan wa lónìí.","Gbogbo ohùn. Gbogbo èdè. Gbogbo ènìyàn wà nínú."],
+  hi:["सुप्रभात। ग्रेस कम्युनिटी चर्च में आपका स्वागत है — यहाँ और ऑनलाइन सभी के लिए।","आज, आप जो भी भाषा बोलते हों, Hermia यह सुनिश्चित करता है कि हर शब्द आप तक पहुँचे।","हमारा संदेश सरल है: हर आवाज़ मायने रखती है। हर व्यक्ति शामिल होने का हकदार है।","विश्वास संदेह की अनुपस्थिति नहीं है। विश्वास मिलकर आगे बढ़ने का चुनाव है।","कोई भाषा समझ में बाधा नहीं होनी चाहिए। कोई विकलांगता भागीदारी में बाधा नहीं।","चाहे आप लंदन, लागोस, मनीला या साओ पाउलो में हों — यह संदेश आपके लिए है।","Hermia इसलिए है ताकि हम जैसे संगठनों को यह न चुनना पड़े कि कौन बाहर रहे।","क्योंकि हर कोई — अपनी भाषा में — सुनने और सुने जाने का हकदार है।","आइए आज हम सभी के लिए जो तैयार किया गया है उसके लिए अपने दिल खोलें।","हर आवाज़। हर भाषा। सभी शामिल।"],
+};
+
+// ── SPEECH LANGUAGE MAP ──
+// Maps our language codes to BCP-47 codes for Web Speech API
+const SPEECH_LANG = {
+  en: 'en-GB', fr: 'fr-FR', es: 'es-ES', de: 'de-DE', it: 'it-IT',
+  pt: 'pt-PT', 'pt-br': 'pt-BR', 'es-mx': 'es-MX', pl: 'pl-PL',
+  nl: 'nl-NL', ru: 'ru-RU', uk: 'uk-UA', ro: 'ro-RO', el: 'el-GR',
+  sv: 'sv-SE', ar: 'ar-SA', hi: 'hi-IN', bn: 'bn-BD', zh: 'zh-CN',
+  ja: 'ja-JP', ko: 'ko-KR', tl: 'fil-PH', vi: 'vi-VN', id: 'id-ID',
+  ur: 'ur-PK', tr: 'tr-TR', fa: 'fa-IR', ta: 'ta-IN', he: 'he-IL',
+  sw: 'sw-KE', yo: 'yo-NG', ha: 'ha-NG', ig: 'ig-NG', zu: 'zu-ZA',
+  am: 'am-ET', so: 'so-SO', mi: 'mi-NZ', sm: 'sm-WS',
+};
+
+// ── STATE ──
+let running = false;
+let selLangs = new Set(['en']);
+let lineIdx = 0;
+let capTimer = null;
+let capSize = 24;
+let mode = 'captions';
+let fsOpen = false;
+let viewers = 1842;
+let speechEnabled = true;
+let speaking = false;
+let availableVoices = [];
+
+// ── INIT ──
+function init() {
+  renderLangs(LANGS);
+  updateTransPanel('');
+  // Load available voices (browser needs a moment)
+  if (window.speechSynthesis) {
+    availableVoices = speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => { availableVoices = speechSynthesis.getVoices(); };
+  }
+}
+
+function renderLangs(list) {
+  const conts = ['Africa','Europe','Asia','Americas','Oceania'];
+  let html = '';
+  conts.forEach(c => {
+    const grp = list.filter(l => l.cont === c);
+    if (!grp.length) return;
+    html += `<div class="cont-label">${c}</div><div class="lang-list">`;
+    grp.forEach(l => {
+      const on = selLangs.has(l.code);
+      html += `<div class="lang-row ${on?'sel':''}" onclick="toggleLang('${l.code}')" data-code="${l.code}">
+        <span class="lflag">${l.flag}</span>
+        <div><div class="lname">${l.name}</div><div class="lnat">${l.native}</div></div>
+        <div class="lcheck">✓</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById('langList').innerHTML = html;
+}
+
+function filterLangs() {
+  const q = document.getElementById('langSearch').value.toLowerCase();
+  const filtered = q ? LANGS.filter(l => l.name.toLowerCase().includes(q) || l.native.toLowerCase().includes(q) || l.cont.toLowerCase().includes(q)) : LANGS;
+  renderLangs(filtered);
+}
+
+function toggleLang(code) {
+  if (code === 'en') { toast('English is the source language — always enabled'); return; }
+  selLangs.has(code) ? selLangs.delete(code) : selLangs.add(code);
+  const el = document.querySelector(`[data-code="${code}"]`);
+  if (el) el.classList.toggle('sel', selLangs.has(code));
+  const l = LANGS.find(x => x.code === code);
+  const cnt = selLangs.size;
+  document.getElementById('selCount').textContent = cnt + ' language' + (cnt!==1?'s':'') + ' enabled';
+  updateTransPanel(lineIdx);
+  toast(selLangs.has(code) ? `✓ ${l?.name} enabled` : `${l?.name} removed`);
+}
+
+// ── DEMO ENGINE ──
+function startDemo() {
+  if (running) return;
+  running = true;
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('streamSim').classList.add('on');
+  document.getElementById('liveBadge').style.display = 'flex';
+  document.getElementById('demoBtn').disabled = true;
+  document.getElementById('demoBtn').textContent = '● Demo Running';
+  document.getElementById('statusRow').style.display = 'flex';
+  document.getElementById('statusTxt').textContent = 'Connecting to audio stream…';
+  document.getElementById('capLatency').style.display = 'flex';
+
+  let vc = viewers;
+  setInterval(() => {
+    vc += Math.floor(Math.random()*4) - 1;
+    document.getElementById('viewerPill').style.display = 'inline';
+    document.getElementById('viewerPill').textContent = vc.toLocaleString() + ' viewers';
+  }, 2800);
+
+  setTimeout(() => {
+    document.getElementById('statusTxt').textContent = 'Faster-Whisper → NLLB-200 → Coqui TTS';
+    showLine(0);
+    capTimer = setInterval(() => {
+      lineIdx = (lineIdx + 1) % SERMON.length;
+      showLine(lineIdx);
+    }, 4500);
+  }, 1600);
+}
+
+function showLine(idx) {
+  lineIdx = idx;
+  const ms = (0.9 + Math.random() * 0.9).toFixed(1);
+  document.getElementById('latMs').textContent = ms + 's';
+
+  const primary = [...selLangs][0];
+  const langData = LANGS.find(l => l.code === primary);
+  const curr = getTrans(primary, idx);
+  const prev = idx > 0 ? getTrans(primary, idx - 1) : '';
+
+  document.getElementById('capFlag').textContent = langData?.flag || '🌐';
+  document.getElementById('capLangName').textContent = (langData?.name || 'English') + ' Captions';
+  document.getElementById('capPrev').textContent = prev;
+  document.getElementById('capCurr').innerHTML = curr + '<span class="cap-cursor"></span>';
+  document.getElementById('fsPrev').textContent = prev;
+  document.getElementById('fsCurr').textContent = curr;
+  updateTransPanel(idx);
+  // Speak the line in selected language
+  speakCurrentLang(idx);
+}
+
+function getTrans(code, idx) {
+  if (code === 'en') return SERMON[idx];
+  if (TRANS[code]) return TRANS[code][idx] || SERMON[idx];
+  return SERMON[idx];
+}
+
+// ── SPEECH ENGINE ──
+function speakLine(text, langCode) {
+  if (!speechEnabled || !window.speechSynthesis) return;
+  if (mode === 'captions') return; // only speak in audio or both mode
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  const bcp = SPEECH_LANG[langCode] || 'en-GB';
+  utter.lang = bcp;
+  utter.rate = 0.92;
+  utter.pitch = 1.0;
+  utter.volume = 1.0;
+  // Try to find a matching voice
+  const match = availableVoices.find(v => v.lang.startsWith(bcp.split('-')[0]))
+             || availableVoices.find(v => v.lang === bcp)
+             || null;
+  if (match) utter.voice = match;
+  speaking = true;
+  utter.onend = () => { speaking = false; };
+  speechSynthesis.speak(utter);
+}
+
+function speakCurrentLang(idx) {
+  const primary = [...selLangs][0];
+  const text = getTrans(primary, idx);
+  speakLine(text, primary);
+}
+
+function toggleSpeech() {
+  speechEnabled = !speechEnabled;
+  if (!speechEnabled) speechSynthesis.cancel();
+  const btn = document.getElementById('audioToggleBtn');
+  if (btn) {
+    btn.textContent = speechEnabled ? '🔊 Audio On' : '🔇 Audio Off';
+    btn.classList.toggle('on', speechEnabled);
+  }
+  toast(speechEnabled ? '🔊 Audio translation enabled' : '🔇 Audio muted');
+}
+
+function updateTransPanel(idx) {
+  const active = LANGS.filter(l => selLangs.has(l.code));
+  document.getElementById('transCount').textContent = active.length ? `(${active.length})` : '';
+  if (!active.length) {
+    document.getElementById('transList').innerHTML = '<div style="color:var(--muted2);font-size:12px;text-align:center;padding:16px">Select languages above to see live translations</div>';
+    return;
+  }
+  document.getElementById('transList').innerHTML = active.map(l => {
+    const txt = (idx !== '' && idx !== undefined) ? getTrans(l.code, idx) : '…';
+    const ms = (0.7 + Math.random() * 0.7).toFixed(1);
+    return `<div class="trans-item">
+      <div class="trans-top">
+        <span class="trans-flag">${l.flag}</span>
+        <span class="trans-lname">${l.name}</span>
+        ${running ? `<span class="trans-ping"><span class="latdot"></span>${ms}s</span>` : ''}
+      </div>
+      <div class="trans-text">${txt}</div>
+      ${mode !== 'captions' ? `<span class="trans-audio" onclick="speakLine(getTrans('${l.code}',${idx}),'${l.code}')">▶ Play ${l.name}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── CONTROLS ──
+function setMode(m) {
+  mode = m;
+  ['captions','audio','both'].forEach(x => document.getElementById('m-'+x)?.classList.toggle('on', x===m));
+  toast(m==='captions'?'📝 Captions only — audio off':m==='audio'?'🔊 Audio translation on':'✨ Captions + Audio on');
+  if (m !== 'captions' && running) speakCurrentLang(lineIdx);
+  if (m === 'captions') speechSynthesis.cancel();
+  updateTransPanel(lineIdx);
+}
+
+function chSize(d) {
+  capSize = Math.max(14, Math.min(52, capSize + d));
+  document.getElementById('capCurr').style.fontSize = capSize + 'px';
+  document.getElementById('capPrev').style.fontSize = Math.max(14, capSize - 6) + 'px';
+  document.getElementById('szVal').textContent = capSize + 'px';
+  document.getElementById('fsCurr').style.fontSize = Math.max(capSize * 1.8, 36) + 'px';
+}
+
+function applyA11y() {
+  const hc = document.getElementById('togHC').checked;
+  const lg = document.getElementById('togLarge').checked;
+  const bg = document.getElementById('togBg').checked;
+  const cz = document.querySelector('.caption-zone');
+  const cc = document.getElementById('capCurr');
+  const fc = document.getElementById('fsCurr');
+  cz.style.background = bg ? '#000' : '';
+  cc.style.color = hc ? '#ffff00' : '';
+  fc.classList.toggle('hc', hc);
+  if (lg) { capSize = 32; document.getElementById('capCurr').style.fontSize = '32px'; document.getElementById('szVal').textContent = '32px'; }
+}
+
+function toggleFS() {
+  fsOpen = !fsOpen;
+  document.getElementById('fsOverlay').classList.toggle('on', fsOpen);
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  el.classList.add('on');
+  setTimeout(() => el.classList.remove('on'), 2600);
+}
+
+init();
+</script>
+<!-- COMPLIANCE FOOTER -->
+<div style="background:#080c0b;border-top:1px solid rgba(255,255,255,0.05);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:11px;color:rgba(255,255,255,0.25)">
+  <div>This is a live simulation demo. No audio is stored. <a href="privacy.html" style="color:#00c9a0;text-decoration:none">Privacy Policy</a> · <a href="terms.html" style="color:#00c9a0;text-decoration:none">Terms</a></div>
+  <div>© 2026 Hermia Labs · <a href="mailto:hello@hermialabs.io" style="color:rgba(255,255,255,0.25);text-decoration:none">hello@hermialabs.io</a></div>
+</div>
+
+</body>
+</html>
