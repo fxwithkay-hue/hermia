@@ -167,11 +167,11 @@ nav a.signin:hover{color:var(--ink)}
       <div class="field-row">
         <div class="field">
           <label>First Name</label>
-          <input type="text" placeholder="Kay" id="firstName">
+          <input type="text" placeholder="John" id="firstName">
         </div>
         <div class="field">
           <label>Last Name</label>
-          <input type="text" placeholder="Masara" id="lastName">
+          <input type="text" placeholder="Doe" id="lastName">
         </div>
       </div>
 
@@ -403,29 +403,79 @@ function showSuccess(title, sub) {
   document.getElementById('successState').style.display = 'block';
 }
 
-function handleSignup() {
+async function handleSignup() {
   if (!validate([['firstName','first name'],['lastName','last name'],['email','email'],['orgName','organisation name'],['password','password']])) return;
   if (!document.getElementById('terms').checked) { showError('Please agree to the Terms of Service'); return; }
   const pw = document.getElementById('password').value;
   if (pw.length < 8) { showError('Password must be at least 8 characters'); return; }
+
   const btn = document.querySelector('#panel-signup .submit-btn');
   btn.disabled = true;
   btn.textContent = 'Creating account…';
-  // Simulate API call
-  setTimeout(() => {
-    showSuccess('Account created! 🎉', `We've sent a verification email to ${document.getElementById('email').value}. Check your inbox then head to your dashboard.`);
-  }, 1500);
+
+  // Notify via Web3Forms
+  const data = {
+    access_key: '18d3cb8d-782c-413c-9fcf-746c5de59e5a',
+    subject: '🎉 New Hermia Account Created',
+    from_name: 'Hermia Signups',
+    name: document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value,
+    email: document.getElementById('email').value,
+    organisation: document.getElementById('orgName').value,
+    org_type: document.getElementById('orgType').value || 'Not specified',
+    plan: selectedPlan,
+    message: `New signup: ${document.getElementById('orgName').value} on ${selectedPlan} plan`
+  };
+
+  try {
+    await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch(e) { /* silent fail — still show success */ }
+
+  showSuccess('Account created! 🎉', `We've sent a verification email to ${document.getElementById('email').value}. Check your inbox then head to your dashboard.`);
 }
 
-function handleWaitlist() {
+async function handleWaitlist() {
   if (!validate([['wlName','name'],['wlEmail','email'],['wlOrg','organisation']])) return;
   if (!document.getElementById('wlTerms').checked) { showError('Please agree to the Terms of Service'); return; }
+
   const btn = document.querySelector('#panel-waitlist .submit-btn');
   btn.disabled = true;
   btn.textContent = 'Joining…';
-  setTimeout(() => {
-    showSuccess("You're on the waitlist! 🌍", `We'll email ${document.getElementById('wlEmail').value} when your access is ready. Expect to hear from us within 48 hours.`);
-  }, 1200);
+
+  const data = {
+    access_key: '18d3cb8d-782c-413c-9fcf-746c5de59e5a',
+    subject: '🌍 New Hermia Waitlist Signup',
+    from_name: 'Hermia Waitlist',
+    name: document.getElementById('wlName').value,
+    email: document.getElementById('wlEmail').value,
+    organisation: document.getElementById('wlOrg').value,
+    congregation_size: document.getElementById('wlSize').value || 'Not specified',
+    languages: document.getElementById('wlLangs').value || 'Not specified',
+    message: `New waitlist signup from ${document.getElementById('wlOrg').value}`
+  };
+
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) {
+      showSuccess("You're on the waitlist! 🌍", `We'll email ${document.getElementById('wlEmail').value} when your access is ready. Expect to hear from us within 48 hours.`);
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Join the Waitlist →';
+      showError('Something went wrong. Please try again or email hello@hermialabs.io');
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Join the Waitlist →';
+    showError('Network error. Please try again.');
+  }
 }
 
 function handleSignin() {
