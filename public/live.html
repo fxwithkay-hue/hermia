@@ -97,6 +97,9 @@ body{background:#0b0f0e;color:#e8ede8;font-family:'Epilogue',sans-serif;min-heig
       </div>
       <span id="micText">Ready</span>
     </div>
+    <div style="margin-left:auto;font-size:11px;color:rgba(232,237,232,0.25);max-width:200px;line-height:1.4">
+      🎤 Microphone access required. Audio is never stored. <a href="privacy.html" style="color:#00c9a0;text-decoration:none">Privacy Policy</a>
+    </div>
   </div>
 
   <div class="langs" id="langPills"></div>
@@ -116,7 +119,7 @@ body{background:#0b0f0e;color:#e8ede8;font-family:'Epilogue',sans-serif;min-heig
 </div>
 
 <script>
-const WS_URL = 'ws://localhost:3000';
+const WS_URL = 'wss://hermia-server.onrender.com';
 
 const LANGS = [
   {code:'fr',name:'French',cc:'FR'},
