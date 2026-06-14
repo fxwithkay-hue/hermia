@@ -4,6 +4,7 @@ const { WebSocketServer } = require('ws');
 const cors = require('cors');
 const { exec } = require('child_process');
 const http = require('http');
+const https = require('https');
 const path = require('path');
 const fs = require('fs');
 
@@ -15,33 +16,50 @@ app.use(express.static(path.join(__dirname, 'public')));
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
+// ── Translation helper ──
+function callTranslation(text, targetLang, callback) {
+  const postData = JSON.stringify({ text, targetLang });
+  const options = {
+    hostname: 'hermia-translation.onrender.com',
+    port: 443,
+    path: '/',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData)
+    }
+  };
+  const req = https.request(options, (res) => {
+    let d = '';
+    res.on('data', chunk => d += chunk);
+    res.on('end', () => {
+      try { callback(null, JSON.parse(d)); }
+      catch(e) { callback(e); }
+    });
+  });
+  req.on('error', (e) => callback(e));
+  req.write(postData);
+  req.end();
+}
+
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'Hermia is running',
     version: '1.0.0',
-    models: { transcription: 'faster-whisper', translation: 'NLLB-200' }
+    models: {
+      transcription: 'faster-whisper',
+      translation: 'LibreTranslate via hermia-translation.onrender.com'
+    }
   });
 });
 
 app.post('/translate', (req, res) => {
   const { text, targetLang } = req.body;
   if (!text || !targetLang) return res.status(400).json({ error: 'Missing text or targetLang' });
-  const postData = JSON.stringify({ text, targetLang });
-  const options = {
-    hostname: 'localhost', port: 5000, path: '/', method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) }
-  };
-  const req2 = http.request(options, (res2) => {
-    let data = '';
-    res2.on('data', chunk => data += chunk);
-    res2.on('end', () => {
-      try { res.json(JSON.parse(data)); } 
-      catch(e) { res.status(500).json({ error: 'Parse error' }); }
-    });
+  callTranslation(text, targetLang, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Translation server error' });
+    res.json(result);
   });
-  req2.on('error', () => res.status(500).json({ error: 'Translation server not running' }));
-  req2.write(postData);
-  req2.end();
 });
 
 app.post('/transcribe', (req, res) => {
@@ -73,29 +91,15 @@ wss.on('connection', (ws) => {
       if (msg.type === 'translate') {
         const { text, targetLangs } = msg;
         targetLangs.forEach(lang => {
-          const postData = JSON.stringify({ text, targetLang: lang });
-          const options = {
-            hostname: 'localhost', port: 5000, path: '/', method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) }
-          };
-          const req = http.request(options, (res) => {
-            let d = '';
-            res.on('data', chunk => d += chunk);
-            res.on('end', () => {
-              try {
-                const result = JSON.parse(d);
-                ws.send(JSON.stringify({
-                  type: 'translation',
-                  language: lang,
-                  original: text,
-                  translated: result.translated
-                }));
-              } catch(e) {}
-            });
+          callTranslation(text, lang, (err, result) => {
+            if (err) return;
+            ws.send(JSON.stringify({
+              type: 'translation',
+              language: lang,
+              original: text,
+              translated: result.translated
+            }));
           });
-          req.on('error', () => {});
-          req.write(postData);
-          req.end();
         });
       }
 
@@ -131,8 +135,8 @@ server.listen(PORT, () => {
   console.log(`
   ╔════════════════════════════════╗
   ║   Hermia Server Running        ║
-  ║   http://localhost:3000         ║
-  ║   WebSocket: ws://localhost:3000║
+  ║   Translation: Render Cloud    ║
+  ║   http://localhost:${PORT}         ║
   ╚════════════════════════════════╝
   `);
 });
