@@ -6,74 +6,52 @@ import os
 
 print("Hermia Translation Server starting...", flush=True)
 
-# Language code mapping — our codes to LibreTranslate codes
 LANG_MAP = {
-    "fr": "fr",
-    "es": "es",
-    "ar": "ar",
-    "sw": "sw",
-    "yo": "yo",
-    "hi": "hi",
-    "de": "de",
-    "pt": "pt",
-    "zh": "zh",
-    "ig": "ig",
-    "ha": "ha",
-    "ru": "ru",
-    "it": "it",
-    "nl": "nl",
-    "pl": "pl",
-    "uk": "uk",
-    "tr": "tr",
-    "vi": "vi",
-    "id": "id",
+    "fr": "fr", "es": "es", "ar": "ar", "sw": "sw",
+    "yo": "yo", "hi": "hi", "de": "de", "pt": "pt",
+    "zh": "zh-CN", "ig": "ig", "ha": "ha", "ru": "ru",
+    "it": "it", "nl": "nl", "pl": "pl", "uk": "uk",
+    "tr": "tr", "vi": "vi", "id": "id",
 }
 
-# Free LibreTranslate instances (public, no key needed)
-LIBRE_SERVERS = [
-    "https://libretranslate.com",
-    "https://translate.argosopentech.com",
-    "https://libretranslate.de",
-]
-
 def translate_text(text, target_lang):
-    """Try multiple free LibreTranslate servers."""
     lt_lang = LANG_MAP.get(target_lang, target_lang)
 
-    for server in LIBRE_SERVERS:
+    # Primary: MyMemory free API
+    try:
+        encoded = urllib.parse.quote(text)
+        url = f"https://api.mymemory.translated.net/get?q={encoded}&langpair=en|{lt_lang}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Hermia/1.0"})
+        with urllib.request.urlopen(req, timeout=8) as response:
+            result = json.loads(response.read())
+            translated = result["responseData"]["translatedText"]
+            status = result["responseStatus"]
+            if status == 200 and translated and translated.lower() != text.lower():
+                print(f"OK MyMemory [{target_lang}]: {translated[:40]}", flush=True)
+                return translated
+    except Exception as e:
+        print(f"MyMemory failed: {e}", flush=True)
+
+    # Fallback: LibreTranslate
+    for server in ["https://translate.argosopentech.com", "https://libretranslate.de"]:
         try:
-            payload = json.dumps({
-                "q": text,
-                "source": "en",
-                "target": lt_lang,
-                "format": "text"
-            }).encode()
-
-            req = urllib.request.Request(
-                f"{server}/translate",
-                data=payload,
-                headers={"Content-Type": "application/json"},
-                method="POST"
-            )
-
+            payload = json.dumps({"q": text, "source": "en", "target": lt_lang, "format": "text"}).encode()
+            req = urllib.request.Request(f"{server}/translate", data=payload,
+                headers={"Content-Type": "application/json"}, method="POST")
             with urllib.request.urlopen(req, timeout=8) as response:
                 result = json.loads(response.read())
-                translated = result.get("translatedText", text)
-                print(f"✓ Translated to {target_lang} via {server}", flush=True)
-                return translated
-
+                translated = result.get("translatedText", "")
+                if translated and translated.lower() != text.lower():
+                    print(f"OK LibreTranslate [{target_lang}]", flush=True)
+                    return translated
         except Exception as e:
-            print(f"✗ {server} failed: {e}", flush=True)
-            continue
+            print(f"LibreTranslate {server} failed: {e}", flush=True)
 
-    # All servers failed — return original text
-    print(f"⚠ All translation servers failed for {target_lang}", flush=True)
     return text
-
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        pass  # suppress default logs
+        pass
 
     def do_OPTIONS(self):
         self.send_response(200)
@@ -86,7 +64,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/health":
             body = json.dumps({
                 "status": "Hermia Translation Server running",
-                "engine": "LibreTranslate",
+                "engine": "MyMemory + LibreTranslate fallback",
                 "supported_languages": list(LANG_MAP.keys())
             }).encode()
             self.send_response(200)
@@ -105,25 +83,18 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length))
             text = body.get("text", "")
             target_lang = body.get("targetLang", "fr")
-
             if not text:
                 response = json.dumps({"error": "No text provided"}).encode()
                 self.send_response(400)
             else:
                 translated = translate_text(text, target_lang)
-                response = json.dumps({
-                    "translated": translated,
-                    "source": "en",
-                    "target": target_lang
-                }).encode()
+                response = json.dumps({"translated": translated, "source": "en", "target": target_lang}).encode()
                 self.send_response(200)
-
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Content-Length", len(response))
             self.end_headers()
             self.wfile.write(response)
-
         except Exception as e:
             print(f"Error: {e}", flush=True)
             error = json.dumps({"error": str(e)}).encode()
@@ -133,8 +104,6 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(error)
 
-
 PORT = int(os.environ.get("PORT", 5000))
-print(f"✓ Translation server ready on port {PORT}", flush=True)
-print(f"✓ Using LibreTranslate — no heavy models needed", flush=True)
+print(f"Ready on port {PORT} - MyMemory primary, LibreTranslate fallback", flush=True)
 HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
