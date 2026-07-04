@@ -20,7 +20,7 @@ const wss = new WebSocketServer({ server });
 function callTranslation(text, targetLang, callback) {
   const postData = JSON.stringify({ text, targetLang });
   const options = {
-    hostname: 'hermia-translation.onrender.com',
+    hostname: 'hermia-translation-oldb.onrender.com',
     port: 443,
     path: '/',
     method: 'POST',
