@@ -48,7 +48,7 @@ app.get('/health', (req, res) => {
     version: '1.0.0',
     models: {
       transcription: 'faster-whisper',
-      translation: 'LibreTranslate via hermia-translation.onrender.com'
+      translation: 'MyMemory via hermia-translation-oldb.onrender.com'
     }
   });
 });
